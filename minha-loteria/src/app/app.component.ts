@@ -2,12 +2,15 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LoteriasService } from './services/loterias.service';
 import { LOTERIA_CONFIGS, LoteriaConfig, LoteriaJogo } from './models/loteria.model';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { JogosComponent } from './shared/components/jogos/jogos.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, CommonModule, FormsModule, JogosComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.scss'
 })
 export class AppComponent {
   title = 'minha-loteria';
@@ -45,5 +48,25 @@ export class AppComponent {
       this.isLoading.set(false);
       return;
     }
+
+    this.loteriaService.getCarregaHistorico(config).subscribe({
+      next: (historicoSet) => {
+        const jogos = this.loteriaService.gerarJogos(totalJogos, totalNumeros, config, historicoSet);
+
+        this.jogosGerados.set(jogos);
+
+        if (historicoSet.size > 0) {
+          console.log(`Verificado contra ${historicoSet.size} resultados passados.`);
+        }
+        this.isLoading.set(false);
+      },
+      error: (erro) => {
+        this.mensagemErro.set('Erro ao consultar API de resultados. Gerando sem validação de histórico.')
+        const jogos = this.loteriaService.gerarJogos(totalJogos, totalNumeros, config, new Set());
+        this.jogosGerados.set(jogos);
+        this.isLoading.set(false);
+      }
+
+    })
   }
 }

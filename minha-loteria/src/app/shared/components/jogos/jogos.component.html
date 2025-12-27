@@ -1,0 +1,9 @@
+<div class="game-ticket">
+    <span class="game-index">Jogo {{ index() }}:</span>
+
+    <div class="numbers">
+        @for (num of jogo().numeros; track num) {
+            <span class="ball">{{num}}</span>
+        }
+    </div>
+</div>
